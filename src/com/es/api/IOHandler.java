@@ -1,0 +1,105 @@
+package com.es.api;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse;
+import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.action.search.SearchRequestBuilder;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.client.Client;
+import org.elasticsearch.client.transport.TransportClient;
+import org.elasticsearch.common.settings.ImmutableSettings;
+import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.common.xcontent.XContentFactory;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.SearchHit;
+import static com.es.type.Definitions.*;
+
+
+public class IOHandler implements IOIface {
+
+	private static Client client = null;
+	private static final String ES_TYPE = "metrics";
+	private static final String HOST = "50.56.179.39";
+	private static final int PORT = 9300;
+
+	static { //this whole thing needs to be replaced by Configuration.
+		Settings settings = ImmutableSettings.settingsBuilder()
+				.put("client.transport.ignore_cluster_name", true)
+				.build();
+		client = new TransportClient(settings)
+		.addTransportAddress(new InetSocketTransportAddress(HOST, PORT));
+	}
+
+	@Override
+	public boolean insert(String tenantId, Map<String, String> map) {
+		ClusterHealthResponse res = client
+				.admin().cluster()
+				.prepareHealth()
+				.setWaitForYellowStatus()
+				.setTimeout("1s")
+				.execute().actionGet();
+		// we probably need to come up with a better strategy for dealing with an unhealthy cluster.
+		if (res.isTimedOut()) {
+			return false;
+		}
+
+		XContentBuilder content;
+		try {
+			content = createSourceContent(tenantId, map);
+		} catch (IOException ie) {
+			return false;
+		}
+		IndexResponse response = client.prepareIndex(getIndex(tenantId), ES_TYPE)
+				.setRouting(getRouting(tenantId))
+				.setSource(content)
+				.execute()
+				.actionGet();
+		return true;
+	}
+
+	@Override
+	public List<Map<String, Object>> search(String tenantId, Map<String, String> query) {
+		List<Map<String, Object>> matched = new ArrayList<Map<String,Object>>();
+    	SearchRequestBuilder request = createSearchRequest(tenantId, query);
+    	SearchResponse searchRes = request.execute().actionGet();
+    	searchRes.getHits().getHits().toString();
+    	for (SearchHit hit : searchRes.getHits().getHits()) {
+    		matched.add(hit.getSource());
+    	}
+    	return matched;
+	}
+
+	private SearchRequestBuilder createSearchRequest(String tenantId, Map<String, String> map) {
+		SearchRequestBuilder request = client.prepareSearch(getIndex(tenantId))
+			.setRouting(getRouting(tenantId))
+			.setQuery(QueryBuilders.fieldQuery(TENANT_ID.toString(), tenantId).analyzeWildcard(true));
+		for(Map.Entry<String, String> entry : map.entrySet()) {
+			request = request.setQuery(QueryBuilders.fieldQuery(entry.getKey(), entry.getValue()).analyzeWildcard(true));
+		}
+		return request;
+	}
+	
+	private XContentBuilder createSourceContent(String tenantId, Map<String, String> map) throws IOException {
+		XContentBuilder json = XContentFactory.jsonBuilder().startObject().field(TENANT_ID.toString(), tenantId);
+		for(Map.Entry<String, String> entry : map.entrySet()) {
+			json = json.field(entry.getKey(), entry.getValue());
+		}
+		json = json.endObject();
+		return json;
+	}
+
+	private String getIndex(String tenantId) {
+		return "test-index-" + String.valueOf(Math.abs(tenantId.hashCode() % 128));
+	}
+
+	private String getRouting(String tenantId) {
+		return tenantId;
+	}
+
+}
