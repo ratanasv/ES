@@ -22,7 +22,7 @@ public class IndexingTest {
 	@Test
 	public void testThatIndexingOccurs() {
 		IOIface handler = new IOHandler();
-		String tenantId = TENANT_ID.getPrefix() + "asdfqwer";
+		String tenantId = TENANT_ID.getPrefix() + "Asdfqwer";
 		for (int i=0; i<20; i++) {
 			Map<String, String> map = IngestWorker.generateRaxLocatordata(String.valueOf(i), String.valueOf(i), 
 					String.valueOf(i));
