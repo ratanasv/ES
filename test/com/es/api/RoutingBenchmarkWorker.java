@@ -103,7 +103,7 @@ public class RoutingBenchmarkWorker {
 		log.info("failures: " + result.getFailureCount());
 		for (Failure failure : result.getFailures()) {
 		      System.out.println(failure.toString());
-		 }
+		}
 	}
 
 	

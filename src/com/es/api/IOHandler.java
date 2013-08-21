@@ -16,6 +16,7 @@ import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
+import org.elasticsearch.index.VersionType;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 
@@ -40,6 +41,8 @@ public class IOHandler implements IOIface {
 		IndexResponse response = client.prepareIndex(getIndex(tenantId), ES_TYPE)
 				.setRouting(getRouting(tenantId))
 				.setSource(content)
+				//.setVersion(1)
+				//.setVersionType(VersionType.EXTERNAL)
 				.execute()
 				.actionGet();
 		return true;
@@ -50,7 +53,6 @@ public class IOHandler implements IOIface {
 		List<Map<String, Object>> matched = new ArrayList<Map<String,Object>>();
     	SearchRequestBuilder request = createSearchRequest(tenantId, query);
     	SearchResponse searchRes = request.execute().actionGet();
-    	searchRes.getHits().getHits().toString();
     	for (SearchHit hit : searchRes.getHits().getHits()) {
     		matched.add(hit.getSource());
     	}
@@ -59,6 +61,7 @@ public class IOHandler implements IOIface {
 
 	private SearchRequestBuilder createSearchRequest(String tenantId, Map<String, String> map) {
 		SearchRequestBuilder request = client.prepareSearch(getIndex(tenantId))
+			.setSize(500)
 			.setRouting(getRouting(tenantId))
 			.setQuery(QueryBuilders.fieldQuery(TENANT_ID.toString(), tenantId).analyzeWildcard(true));
 		for(Map.Entry<String, String> entry : map.entrySet()) {
