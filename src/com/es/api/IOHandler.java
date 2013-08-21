@@ -18,23 +18,15 @@ import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
-import static com.es.type.Definitions.*;
+
+import com.es.client.ElasticClient;
+import static com.es.type.RaxLocator.*;
 
 
 public class IOHandler implements IOIface {
 
-	private static Client client = null;
+	private static Client client = ElasticClient.getClient();
 	private static final String ES_TYPE = "metrics";
-	private static final String HOST = "50.56.179.39";
-	private static final int PORT = 9300;
-
-	static { //this whole thing needs to be replaced by Configuration.
-		Settings settings = ImmutableSettings.settingsBuilder()
-				.put("client.transport.ignore_cluster_name", true)
-				.build();
-		client = new TransportClient(settings)
-		.addTransportAddress(new InetSocketTransportAddress(HOST, PORT));
-	}
 
 	@Override
 	public boolean insert(String tenantId, Map<String, String> map) {

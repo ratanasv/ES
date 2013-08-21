@@ -28,7 +28,7 @@ import org.junit.runner.notification.Failure;
 import com.es.client.ElasticClient;
 import com.es.worker.ClearIndexWorker;
 
-import static com.es.type.Definitions.*;
+import static com.es.type.RaxLocator.*;
 
 import com.es.worker.IngestWorker;
 

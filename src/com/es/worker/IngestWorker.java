@@ -11,7 +11,7 @@ import org.apache.log4j.*;
 import com.es.api.IOHandler;
 import com.es.api.IOIface;
 
-import static com.es.type.Definitions.*;
+import static com.es.type.RaxLocator.*;
 
 public final class IngestWorker implements Runnable{
 

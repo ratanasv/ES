@@ -1,11 +1,11 @@
 package com.es.type;
 
-public enum Definitions {
+public enum RaxLocator {
 	TENANT_ID("ac"),
 	ENTITY_ID("en"),
 	CHECK_ID("ch"),
 	METRIC("dim0.");
-	Definitions(String p) {
+	RaxLocator(String p) {
 		this.prefix = p;
 	}
 	public String getPrefix() {
