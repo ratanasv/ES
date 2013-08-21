@@ -30,17 +30,6 @@ public class IOHandler implements IOIface {
 
 	@Override
 	public boolean insert(String tenantId, Map<String, String> map) {
-		ClusterHealthResponse res = client
-				.admin().cluster()
-				.prepareHealth()
-				.setWaitForYellowStatus()
-				.setTimeout("1s")
-				.execute().actionGet();
-		// we probably need to come up with a better strategy for dealing with an unhealthy cluster.
-		if (res.isTimedOut()) {
-			return false;
-		}
-
 		XContentBuilder content;
 		try {
 			content = createSourceContent(tenantId, map);
