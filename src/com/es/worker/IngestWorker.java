@@ -24,10 +24,8 @@ public final class IngestWorker implements Runnable{
 		int failures = 0;
 		for (int count=0; count<numDocs; count++) {
 			IOIface handler = new IOHandler();
-			Map<String, String> map = new HashMap<String, String>();
-			map.put(ENTITY_ID.toString(), ENTITY_ID.getPrefix() + UUID.randomUUID());
-			map.put(CHECK_ID.toString(), CHECK_ID.getPrefix() + UUID.randomUUID());
-			map.put(METRIC.toString(), METRIC.getPrefix() + UUID.randomUUID());
+			Map<String, String> map = IngestWorker.generateRaxLocatordata(UUID.randomUUID().toString(), 
+					UUID.randomUUID().toString(), UUID.randomUUID().toString());
 			final String tenantId = TENANT_ID.getPrefix() + UUID.randomUUID();
 			long start = System.currentTimeMillis();
 			boolean ok = handler.insert(tenantId, map);
@@ -52,6 +50,24 @@ public final class IngestWorker implements Runnable{
 		this.numDocs = i;
 		return this;
 	}
+	
+	public static void Ingest(int numThreads, int numDocs) {
+		log.info("numThreads=" + numThreads + " numDocs=" + numDocs);
+		ExecutorService exec = Executors.newCachedThreadPool();
+		for (int i=0; i<numThreads; i++) {
+			exec.execute(IngestWorker.IngestWorkerBuilder().numDocs(numDocs));
+		}
+		exec.shutdown();
+	}
+	
+	public static Map<String, String> generateRaxLocatordata(String entityId, String checkId,
+		String metric) {
+		Map<String, String> map = new HashMap<String,String>();
+		map.put(ENTITY_ID.toString(), ENTITY_ID.getPrefix()+entityId);
+		map.put(CHECK_ID.toString(), CHECK_ID.getPrefix()+checkId);
+		map.put(METRIC.toString(), METRIC.getPrefix()+metric);
+		return map;
+	}
 
 	public static void main(String[] args) {
 		int numThreads = 1;
@@ -67,12 +83,7 @@ public final class IngestWorker implements Runnable{
 				System.exit(1);
 			}
 		}
-		log.info("numThreads="+numThreads);
-		ExecutorService exec = Executors.newCachedThreadPool();
-		for (int i=0; i<numThreads; i++) {
-			exec.execute(IngestWorker.IngestWorkerBuilder().numDocs(numDocs));
-		}
-		exec.shutdown();
+		IngestWorker.Ingest(numThreads, numDocs);
 	}
 
 }

@@ -26,6 +26,7 @@ import static com.es.type.RaxLocator.*;
 public class IOHandler implements IOIface {
 
 	private static Client client = ElasticClient.getClient();
+	// currently not that useful at the moment.
 	private static final String ES_TYPE = "metrics";
 
 	@Override
@@ -68,7 +69,9 @@ public class IOHandler implements IOIface {
 	
 	private XContentBuilder createSourceContent(String tenantId, Map<String, String> map) throws IOException {
 		XContentBuilder json = XContentFactory.jsonBuilder().startObject().field(TENANT_ID.toString(), tenantId);
-		for(Map.Entry<String, String> entry : map.entrySet()) {
+		// map might already contain this field but we do it anyway.
+		json = json.field(TENANT_ID.toString(), tenantId);
+		for (Map.Entry<String, String> entry : map.entrySet()) {
 			json = json.field(entry.getKey(), entry.getValue());
 		}
 		json = json.endObject();

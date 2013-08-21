@@ -45,29 +45,12 @@ public class RoutingBenchmarkWorker {
 		
 		log.info("benchmarking numDocs="+RoutingBenchmarkWorker.numDocs
 			+" numThreads=" + RoutingBenchmarkWorker.numThreads);
-		ExecutorService executor = Executors.newCachedThreadPool();
-		for (int i=0; i<numThreads; i++) {
-			executor.execute(IngestWorker.IngestWorkerBuilder().numDocs(numDocs));
-		}
-		executor.shutdown();
-		try {
-			executor.awaitTermination(7, TimeUnit.MINUTES);
-		} catch (InterruptedException e) {
-			Assert.fail("waiting for threads failed");
-		}
+		IngestWorker.Ingest(numThreads, numDocs);
 	}
 	
 	@AfterClass 
 	public static void clearData() {
-		ExecutorService exec = Executors.newCachedThreadPool();
-		log.info("clearing all");
-		exec.execute(new ClearIndexWorker("all"));
-		exec.shutdown();
-		try {
-			exec.awaitTermination(7, TimeUnit.MINUTES);
-		} catch (InterruptedException e) {
-			Assert.fail("waiting for threads failed");
-		}
+		ClearIndexWorker.clear("all");
 	}
 	
 	@Test

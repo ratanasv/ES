@@ -39,6 +39,20 @@ public class ClearIndexWorker implements Runnable {
 	public ClearIndexWorker(String s) {
 		this.indexToClear = s;
 	}
+	
+	public static void clear(String ... args) {
+		ExecutorService exec = Executors.newCachedThreadPool();
+		for (String s: args) {
+			log.info("clearing " + s);
+			exec.execute(new ClearIndexWorker(s));
+		}
+		exec.shutdown();
+		try {
+			exec.awaitTermination(7, TimeUnit.MINUTES);
+		} catch (InterruptedException e) {
+			Assert.fail("waiting for threads failed");
+		}
+	}
 	/**
 	 * @param args
 	 */
