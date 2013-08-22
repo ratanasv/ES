@@ -43,7 +43,7 @@ public final class IngestWorker implements Runnable{
 			long stop = System.currentTimeMillis();
 			sum += (stop-start);
 
-			if (count % 10 == 0 && count != 0) {
+			if (count % 20 == 0 && count != 0) {
 				log.info("Average index latency (ms):" + sum/(count-failures));
 				log.info("Failures : " + failures);
 			}
