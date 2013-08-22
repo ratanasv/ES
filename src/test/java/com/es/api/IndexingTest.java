@@ -14,8 +14,8 @@ import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
 
 import com.es.client.ElasticClient;
+import com.es.rax.RaxLocator;
 import com.es.worker.ClearIndexWorker;
-import com.es.worker.IngestWorker;
 
 import static com.es.rax.RaxLocator.*;
 
@@ -27,7 +27,7 @@ public class IndexingTest {
 		ClearIndexWorker.clear("all");
 		String tenantId = TENANT_ID.getPrefix() + "Asdfqwer";
 		for (int i=0; i<20; i++) {
-			Map<String, String> map = IngestWorker.generateRaxLocatordata(String.valueOf(i), String.valueOf(i), 
+			Map<String, String> map = RaxLocator.generateRaxLocatordata(String.valueOf(i), String.valueOf(i), 
 					String.valueOf(i));
 			handler.insert(tenantId, map);
 		}
