@@ -32,7 +32,6 @@ import com.es.worker.ClearIndexWorker;
 
 import static com.es.rax.RaxLocator.*;
 
-import com.es.worker.IngestWorker;
 
 public class RoutingBenchmarkTest {
 	

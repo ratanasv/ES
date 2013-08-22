@@ -1,4 +1,4 @@
-package com.es.worker;
+package com.es.api;
 
 import java.util.Map;
 import java.util.UUID;
@@ -18,7 +18,9 @@ import static com.es.rax.RaxLocator.*;
 public final class IngestWorker implements Runnable{
 
 	private static final Logger log = Logger.getLogger(IngestWorker.class);
-	int numDocs = 100;
+	private int numDocs = 100;
+	private int numThreads = 1;
+	private String tenantId = null;
 
 	@Override
 	public void run() {
@@ -28,7 +30,11 @@ public final class IngestWorker implements Runnable{
 			IOIface handler = new IOHandler();
 			Map<String, String> map = RaxLocator.generateRaxLocatordata(UUID.randomUUID().toString(), 
 					UUID.randomUUID().toString(), UUID.randomUUID().toString());
-			final String tenantId = TENANT_ID.getPrefix() + UUID.randomUUID();
+
+			if (this.tenantId == null) {
+				this.tenantId = TENANT_ID.getPrefix() + UUID.randomUUID();
+			}
+
 			long start = System.currentTimeMillis();
 			boolean ok = handler.insert(tenantId, map);
 			if (!ok) {
@@ -36,7 +42,7 @@ public final class IngestWorker implements Runnable{
 			}
 			long stop = System.currentTimeMillis();
 			sum += (stop-start);
-			
+
 			if (count % 10 == 0 && count != 0) {
 				log.info("Average index latency (ms):" + sum/(count-failures));
 				log.info("Failures : " + failures);
@@ -52,7 +58,12 @@ public final class IngestWorker implements Runnable{
 		this.numDocs = i;
 		return this;
 	}
-	
+
+	public IngestWorker tenantId(String i) {
+		this.tenantId = i;
+		return this;
+	}
+
 	public static void Ingest(int numThreads, int numDocs) {
 		log.info("numThreads=" + numThreads + " numDocs=" + numDocs);
 		ExecutorService exec = Executors.newCachedThreadPool();
@@ -67,6 +78,20 @@ public final class IngestWorker implements Runnable{
 		}
 	}
 	
+	public static void Ingest(String tenantId, int numThreads, int numDocs) {
+		log.info("numThreads=" + numThreads + " numDocs=" + numDocs);
+		ExecutorService exec = Executors.newCachedThreadPool();
+		for (int i=0; i<numThreads; i++) {
+			exec.execute(IngestWorker.IngestWorkerBuilder().numDocs(numDocs).tenantId(tenantId));
+		}
+		exec.shutdown();
+		try {
+			exec.awaitTermination(7, TimeUnit.MINUTES);
+		} catch (InterruptedException e) {
+			Assert.fail("waiting for threads failed");
+		}
+	}
+
 	public static void main(String[] args) {
 		int numThreads = 1;
 		int numDocs = 100;
