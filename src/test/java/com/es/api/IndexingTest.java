@@ -43,16 +43,5 @@ public class IndexingTest {
 		CountResponse countRes = ElasticClient.getClient().prepareCount().execute().actionGet();
 		Assert.assertEquals(countRes.getCount(), 0);
 	}
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		Result result = JUnitCore.runClasses(IndexingTest.class);
-		log.info("success: " + (result.getRunCount()-result.getFailureCount()) );
-		log.info("failures: " + result.getFailureCount());
-		for (Failure failure : result.getFailures()) {
-			System.out.println(failure.toString());
-		}
-	}
 
 }

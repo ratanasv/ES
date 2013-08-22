@@ -103,18 +103,5 @@ public class RoutingBenchmarkTest {
 		}
 		log.info("with routing time="+stopWatch.stop().lastTaskTime().getMillis());
 	}
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		Result result = JUnitCore.runClasses(RoutingBenchmarkTest.class);
-		log.info("success: " + (result.getRunCount()-result.getFailureCount()) );
-		log.info("failures: " + result.getFailureCount());
-		for (Failure failure : result.getFailures()) {
-			System.out.println(failure.toString());
-		}
-	}
-
-
-
+	
 }
