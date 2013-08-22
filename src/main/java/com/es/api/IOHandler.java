@@ -97,12 +97,29 @@ public class IOHandler implements IOIface {
 		return tenantId;
 	}
 	
+	
+	/**
+	 * WARNING: XContentBuilder does not implement equals and hashCode, so this method is obsolete.
+	 * @param content
+	 * @return
+	 */
 	private String getId(XContentBuilder content) {
 		return String.valueOf(content.hashCode());
 	}
 	
+	/** Return the hashCode which can be used as the "id" of the arguments. 
+	 * This is implemented since XContentBuilder does not.
+	 * @param tenantId
+	 * @param map
+	 * @return hashCode (or "id").
+	 */
 	private String getId(String tenantId, Map<String, String> map) {
-		return String.valueOf(tenantId.hashCode() + map.hashCode());
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((map == null) ? 0 : map.hashCode());
+		result = prime * result
+				+ ((tenantId == null) ? 0 : tenantId.hashCode());
+		return String.valueOf(result);
 	}
 
 }
