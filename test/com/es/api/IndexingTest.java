@@ -33,10 +33,10 @@ public class IndexingTest {
 			Map<String, String> query = new HashMap<String, String>();
 			query.put(ENTITY_ID.toString(), ENTITY_ID.getPrefix()+String.valueOf(i));
 			List<Map<String, Object>> result = handler.search(tenantId, query);
-			//Assert.assertEquals(1, result.size());
-			log.info(result.toString());
+			Assert.assertEquals(1, result.size());
+			log.debug(result.toString());
 		}
-
+		
 
 	}
 	/**

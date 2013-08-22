@@ -42,7 +42,8 @@ public class IOHandler implements IOIface {
 			return false;
 		}
 		IndexResponse response = client.prepareIndex(getIndex(tenantId), ES_TYPE)
-				.setId(getId(content))
+				//.setId(getId(content))
+				.setId(getId(tenantId, map))
 				.setRouting(getRouting(tenantId))
 				.setSource(content)
 				//.setVersion(1)
@@ -58,7 +59,7 @@ public class IOHandler implements IOIface {
     	SearchRequestBuilder request = createSearchRequest(tenantId, query);
     	SearchResponse searchRes = request.execute().actionGet();
     	for (SearchHit hit : searchRes.getHits().getHits()) {
-    		log.debug(hit.getShard() + "," + hit.version());
+    		log.debug("id=" + hit.getId() + ", shard=" + hit.getShard() + ", version=" + hit.version());
     		matched.add(hit.getSource());
     	}
     	return matched;
@@ -68,7 +69,7 @@ public class IOHandler implements IOIface {
 		SearchRequestBuilder request = client.prepareSearch(getIndex(tenantId))
 			.setSize(500)
 			.setRouting(getRouting(tenantId))
-			//.setVersion(true)
+			.setVersion(true)
 			.setQuery(QueryBuilders.fieldQuery(TENANT_ID.toString(), tenantId).analyzeWildcard(true));
 		for(Map.Entry<String, String> entry : map.entrySet()) {
 			request = request.setQuery(QueryBuilders.fieldQuery(entry.getKey(), entry.getValue()).analyzeWildcard(true));
@@ -98,6 +99,10 @@ public class IOHandler implements IOIface {
 	
 	private String getId(XContentBuilder content) {
 		return String.valueOf(content.hashCode());
+	}
+	
+	private String getId(String tenantId, Map<String, String> map) {
+		return String.valueOf(tenantId.hashCode() + map.hashCode());
 	}
 
 }
