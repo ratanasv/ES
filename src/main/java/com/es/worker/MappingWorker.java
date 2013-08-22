@@ -44,7 +44,6 @@ final class MappingWorker {
 		//PutMappingResponse mapRes = ElasticClient.getClient().admin().indices().preparePutMapping("test-index-0")
 		//	.setType("metrics").setSource(content).execute().actionGet();
 		
-		
 	}
 
 }
