@@ -39,18 +39,19 @@ public class RoutingBenchmarkTest {
 	static int numDocs = 100;
 	static int numThreads = 10;
 	static IOIface handler = null;
+	private static final String tenantId = TENANT_ID.getPrefix() + "Asdfqwer";
+	private static final String index = "test-index-55"; //matched the tenantId above.
 	
-	@Before
-	public void generateData() {
+	@BeforeClass
+	public static void generateData() {
 		handler = new IOHandler();
-		
 		log.info("benchmarking numDocs="+RoutingBenchmarkTest.numDocs
 			+" numThreads=" + RoutingBenchmarkTest.numThreads);
-		IngestWorker.Ingest(numThreads, numDocs);
+		IngestWorker.Ingest(tenantId, numThreads, numDocs);
 	}
 	
-	@After
-	public void clearData() {
+	@AfterClass
+	public static void clearData() {
 		ClearIndexWorker.clear("all");
 	}
 	
@@ -66,7 +67,7 @@ public class RoutingBenchmarkTest {
 		StopWatch stopWatch = new StopWatch().start();
 		for (int i=0; i<numDocs; i++) {
 			
-			SearchResponse searchRes = ElasticClient.getClient().prepareSearch("test-index-0").setQuery(
+			SearchResponse searchRes = ElasticClient.getClient().prepareSearch(index).setQuery(
 					QueryBuilders.queryString(TENANT_ID.toString() + ":" + TENANT_ID.getPrefix() + "*")
 					.analyzeWildcard(true))
 					.execute().actionGet();
@@ -87,7 +88,7 @@ public class RoutingBenchmarkTest {
 		
 		StopWatch stopWatch = new StopWatch().start();
 		for (int i=0; i<numDocs; i++) {
-			SearchResponse searchRes = ElasticClient.getClient().prepareSearch("test-index-0").setRouting("0").setQuery(
+			SearchResponse searchRes = ElasticClient.getClient().prepareSearch(index).setRouting("0").setQuery(
 					QueryBuilders.queryString(TENANT_ID.toString() + ":" + TENANT_ID.getPrefix() + "*")
 					.analyzeWildcard(true))
 					.execute().actionGet();
