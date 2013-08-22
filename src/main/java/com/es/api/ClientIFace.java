@@ -2,6 +2,7 @@ package com.es.api;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Future;
 
 public interface ClientIFace {
 	
@@ -11,7 +12,7 @@ public interface ClientIFace {
 	 * @param map key-value pairs.
 	 * @return true if insert succeeds, false otherwise.
 	 */
-	public boolean insert(String tenantId, Map<String, String> map);
+	public Future<Boolean> insert(String tenantId, Map<String, String> map);
 	
 	
 	/** 
@@ -21,5 +22,5 @@ public interface ClientIFace {
 	 * @param query key-value pairs where each value could contain the wildcard character (*). 
 	 * @return A list of sources you inserted earlier.
 	 */
-	public List<Map<String, Object>> search(String tenantId, Map<String, String> query);
+	public Future<List<Map<String, Object>>> search(String tenantId, Map<String, String> query);
 }
