@@ -5,13 +5,15 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.*;
+import org.junit.Assert;
 
 import com.es.api.IOHandler;
 import com.es.api.IOIface;
 
-import static com.es.type.RaxLocator.*;
+import static com.es.rax.RaxLocator.*;
 
 public final class IngestWorker implements Runnable{
 
@@ -58,6 +60,11 @@ public final class IngestWorker implements Runnable{
 			exec.execute(IngestWorker.IngestWorkerBuilder().numDocs(numDocs));
 		}
 		exec.shutdown();
+		try {
+			exec.awaitTermination(7, TimeUnit.MINUTES);
+		} catch (InterruptedException e) {
+			Assert.fail("waiting for threads failed");
+		}
 	}
 	
 	public static Map<String, String> generateRaxLocatordata(String entityId, String checkId,

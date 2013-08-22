@@ -1,4 +1,4 @@
-package com.es.type;
+package com.es.rax;
 
 public enum RaxLocator {
 	TENANT_ID("ac"),

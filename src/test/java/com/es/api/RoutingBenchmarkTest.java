@@ -17,8 +17,10 @@ import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.JUnitCore;
@@ -28,28 +30,28 @@ import org.junit.runner.notification.Failure;
 import com.es.client.ElasticClient;
 import com.es.worker.ClearIndexWorker;
 
-import static com.es.type.RaxLocator.*;
+import static com.es.rax.RaxLocator.*;
 
 import com.es.worker.IngestWorker;
 
-public class RoutingBenchmarkWorker {
+public class RoutingBenchmarkTest {
 	
-	private static final Logger log = Logger.getLogger(RoutingBenchmarkWorker.class);
-	static int numDocs = 1000;
+	private static final Logger log = Logger.getLogger(RoutingBenchmarkTest.class);
+	static int numDocs = 100;
 	static int numThreads = 10;
 	static IOIface handler = null;
 	
-	@BeforeClass 
-	public static void generateData() {
+	@Before
+	public void generateData() {
 		handler = new IOHandler();
 		
-		log.info("benchmarking numDocs="+RoutingBenchmarkWorker.numDocs
-			+" numThreads=" + RoutingBenchmarkWorker.numThreads);
+		log.info("benchmarking numDocs="+RoutingBenchmarkTest.numDocs
+			+" numThreads=" + RoutingBenchmarkTest.numThreads);
 		IngestWorker.Ingest(numThreads, numDocs);
 	}
 	
-	@AfterClass 
-	public static void clearData() {
+	@After
+	public void clearData() {
 		ClearIndexWorker.clear("all");
 	}
 	
@@ -64,6 +66,7 @@ public class RoutingBenchmarkWorker {
 		log.info("health="+healthRes.getStatus().toString());
 		StopWatch stopWatch = new StopWatch().start();
 		for (int i=0; i<numDocs; i++) {
+			
 			SearchResponse searchRes = ElasticClient.getClient().prepareSearch("test-index-0").setQuery(
 					QueryBuilders.queryString(TENANT_ID.toString() + ":" + TENANT_ID.getPrefix() + "*")
 					.analyzeWildcard(true))
@@ -98,7 +101,7 @@ public class RoutingBenchmarkWorker {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		Result result = JUnitCore.runClasses(RoutingBenchmarkWorker.class);
+		Result result = JUnitCore.runClasses(RoutingBenchmarkTest.class);
 		log.info("success: " + (result.getRunCount()-result.getFailureCount()) );
 		log.info("failures: " + result.getFailureCount());
 		for (Failure failure : result.getFailures()) {

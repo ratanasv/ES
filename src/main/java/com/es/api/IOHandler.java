@@ -24,7 +24,7 @@ import org.elasticsearch.search.SearchHit;
 import com.es.client.ElasticClient;
 import com.es.worker.ClearIndexWorker;
 
-import static com.es.type.RaxLocator.*;
+import static com.es.rax.RaxLocator.*;
 
 
 public class IOHandler implements IOIface {
