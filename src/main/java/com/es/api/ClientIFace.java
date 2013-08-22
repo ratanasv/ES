@@ -3,7 +3,7 @@ package com.es.api;
 import java.util.List;
 import java.util.Map;
 
-public interface IOIface {
+public interface ClientIFace {
 	
 	/**
 	 * Insert key-value pairs with a specific tenantId into an ES cluster.

@@ -13,7 +13,7 @@ import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
 
-import com.es.client.ElasticClient;
+import com.es.client.ClientManager;
 import com.es.rax.RaxLocator;
 import com.es.worker.ClearIndexWorker;
 
@@ -23,7 +23,7 @@ public class IndexingTest {
 	private static final Logger log = Logger.getLogger(IndexingTest.class);
 	@Test
 	public void testThatIndexingOccurs() {
-		IOIface handler = new IOHandler();
+		ClientIFace handler = new ClientImpl();
 		ClearIndexWorker.clear("all");
 		String tenantId = TENANT_ID.getPrefix() + "Asdfqwer";
 		for (int i=0; i<20; i++) {
@@ -31,7 +31,7 @@ public class IndexingTest {
 					String.valueOf(i));
 			handler.insert(tenantId, map);
 		}
-		ElasticClient.getClient().admin().indices().prepareRefresh().execute().actionGet();
+		ClientManager.getClient().admin().indices().prepareRefresh().execute().actionGet();
 		for (int i=0; i<20; i++) {
 			Map<String, String> query = new HashMap<String, String>();
 			query.put(ENTITY_ID.toString(), ENTITY_ID.getPrefix()+String.valueOf(i));
@@ -40,7 +40,7 @@ public class IndexingTest {
 			log.debug(result.toString());
 		}
 		ClearIndexWorker.clear("all");
-		CountResponse countRes = ElasticClient.getClient().prepareCount().execute().actionGet();
+		CountResponse countRes = ClientManager.getClient().prepareCount().execute().actionGet();
 		Assert.assertEquals(countRes.getCount(), 0);
 	}
 

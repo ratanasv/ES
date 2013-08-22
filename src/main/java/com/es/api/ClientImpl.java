@@ -21,15 +21,15 @@ import org.elasticsearch.index.VersionType;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 
-import com.es.client.ElasticClient;
+import com.es.client.ClientManager;
 import com.es.worker.ClearIndexWorker;
 
 import static com.es.rax.RaxLocator.*;
 
 
-public class IOHandler implements IOIface {
-	private static final Logger log = Logger.getLogger(IOHandler.class);
-	private static Client client = ElasticClient.getClient();
+public class ClientImpl implements ClientIFace {
+	private static final Logger log = Logger.getLogger(ClientImpl.class);
+	private static Client client = ClientManager.getClient();
 	// currently not that useful at the moment.
 	private static final String ES_TYPE = "metrics";
 

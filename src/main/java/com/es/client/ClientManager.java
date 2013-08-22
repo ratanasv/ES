@@ -6,7 +6,7 @@ import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 
-public final class ElasticClient {
+public final class ClientManager {
 	private static Client client = null;
 	private static Settings settings = ImmutableSettings.settingsBuilder()
 			.put("client.transport.ignore_cluster_name", true)
@@ -26,7 +26,7 @@ public final class ElasticClient {
 			.addTransportAddress(new InetSocketTransportAddress(Hosts.DFW1_ES.get(), 9300));
 	}
 	
-	private ElasticClient() {
+	private ClientManager() {
 		
 	}
 	

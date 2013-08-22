@@ -27,7 +27,7 @@ import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
 
-import com.es.client.ElasticClient;
+import com.es.client.ClientManager;
 import com.es.worker.ClearIndexWorker;
 
 import static com.es.rax.RaxLocator.*;
@@ -38,14 +38,14 @@ public class RoutingBenchmarkTest {
 	private static final Logger log = Logger.getLogger(RoutingBenchmarkTest.class);
 	static int numDocs = 100;
 	static int numThreads = 10;
-	static IOIface handler = null;
+	static ClientIFace handler = null;
 	private static final String tenantId = TENANT_ID.getPrefix() + "Asdfqwer";
 	private static final String index = "test-index-55"; //matched the tenantId above.
 	private static final String routing = "2"; //matched the tenantId above.
 
 	@BeforeClass
 	public static void generateData() {
-		handler = new IOHandler();
+		handler = new ClientImpl();
 		log.info("benchmarking numDocs="+RoutingBenchmarkTest.numDocs
 				+" numThreads=" + RoutingBenchmarkTest.numThreads);
 		IngestWorker.Ingest(tenantId, numThreads, numDocs);
@@ -60,15 +60,15 @@ public class RoutingBenchmarkTest {
 	public void withoutRouting() {
 
 		log.info("refresing indices");
-		ElasticClient.getClient().admin().indices().prepareRefresh().execute().actionGet();
-		ClusterHealthResponse healthRes = ElasticClient.getClient()
+		ClientManager.getClient().admin().indices().prepareRefresh().execute().actionGet();
+		ClusterHealthResponse healthRes = ClientManager.getClient()
 				.admin().cluster().prepareHealth().setWaitForYellowStatus()
 				.execute().actionGet();
 		log.info("health="+healthRes.getStatus().toString());
 		StopWatch stopWatch = new StopWatch().start();
 		for (int i=0; i<numDocs; i++) {
 
-			SearchResponse searchRes = ElasticClient.getClient()
+			SearchResponse searchRes = ClientManager.getClient()
 					.prepareSearch(index)
 					.setQuery(
 							QueryBuilders.queryString(TENANT_ID.toString() + ":" + TENANT_ID.getPrefix() + "*")
@@ -83,15 +83,15 @@ public class RoutingBenchmarkTest {
 	@Test
 	public void withRouting() {
 		log.info("refresing indices");
-		ElasticClient.getClient().admin().indices().prepareRefresh().execute().actionGet();
-		ClusterHealthResponse healthRes = ElasticClient.getClient()
+		ClientManager.getClient().admin().indices().prepareRefresh().execute().actionGet();
+		ClusterHealthResponse healthRes = ClientManager.getClient()
 				.admin().cluster().prepareHealth().setWaitForYellowStatus()
 				.execute().actionGet();
 		log.info("health="+healthRes.getStatus().toString());
 
 		StopWatch stopWatch = new StopWatch().start();
 		for (int i=0; i<numDocs; i++) {
-			SearchResponse searchRes = ElasticClient.getClient()
+			SearchResponse searchRes = ClientManager.getClient()
 					.prepareSearch(index)
 					.setRouting(tenantId)
 					.setQuery(

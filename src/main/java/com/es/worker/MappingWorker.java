@@ -7,7 +7,7 @@ import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 
-import com.es.client.ElasticClient;
+import com.es.client.ClientManager;
 
 final class MappingWorker {
 
@@ -39,7 +39,7 @@ final class MappingWorker {
 				.endObject()
 			.endObject();
 		
-		DeleteMappingResponse delRes =  ElasticClient.getClient().admin().indices().prepareDeleteMapping().setType("metrics")
+		DeleteMappingResponse delRes =  ClientManager.getClient().admin().indices().prepareDeleteMapping().setType("metrics")
 			.execute().actionGet();
 		//PutMappingResponse mapRes = ElasticClient.getClient().admin().indices().preparePutMapping("test-index-0")
 		//	.setType("metrics").setSource(content).execute().actionGet();

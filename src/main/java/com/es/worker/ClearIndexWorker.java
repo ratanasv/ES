@@ -11,7 +11,7 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.junit.Assert;
 
-import com.es.client.ElasticClient;
+import com.es.client.ClientManager;
 
 public class ClearIndexWorker implements Runnable {
 	private static final Logger log = Logger.getLogger(ClearIndexWorker.class);
@@ -20,19 +20,19 @@ public class ClearIndexWorker implements Runnable {
 	public void run() {
 		CountResponse countRes;
 		if (indexToClear.equals("all")) {
-			countRes = ElasticClient.getClient().prepareCount().execute().actionGet();
+			countRes = ClientManager.getClient().prepareCount().execute().actionGet();
 		} else {
-			countRes = ElasticClient.getClient().prepareCount(indexToClear).execute().actionGet();
+			countRes = ClientManager.getClient().prepareCount(indexToClear).execute().actionGet();
 		}
 		log.info(indexToClear + ", numDocs=" + countRes.getCount());
 		if (indexToClear.equals("all")) {
-			ElasticClient.getClient().prepareDeleteByQuery()
+			ClientManager.getClient().prepareDeleteByQuery()
 			.setQuery(QueryBuilders.matchAllQuery()).execute().actionGet();
 		} else {
-			ElasticClient.getClient().prepareDeleteByQuery(indexToClear)
+			ClientManager.getClient().prepareDeleteByQuery(indexToClear)
 				.setQuery(QueryBuilders.matchAllQuery()).execute().actionGet();
 		}
-		log.info(indexToClear + " cleared, health=" + ElasticClient.getClient()
+		log.info(indexToClear + " cleared, health=" + ClientManager.getClient()
 				.admin().cluster().prepareHealth().execute().actionGet().getStatus().toString());
 	}
 	

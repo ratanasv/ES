@@ -4,7 +4,7 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.apache.log4j.*;
 
-import com.es.client.ElasticClient;
+import com.es.client.ClientManager;
 
 
 public class SearchWorker {
@@ -13,7 +13,7 @@ public class SearchWorker {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		SearchResponse res = ElasticClient.getClient().prepareSearch("test-index-0")
+		SearchResponse res = ClientManager.getClient().prepareSearch("test-index-0")
 	    		.setQuery(QueryBuilders.fieldQuery("lateToParty", "ltp-0"))//.analyzeWildcard(true))
 	    		//.setQuery(QueryBuilders.fieldQuery("entityId", "en*").analyzeWildcard(true))
 	    		//.setQuery(QueryBuilders.fieldQuery("checkId", "ch*").analyzeWildcard(true))

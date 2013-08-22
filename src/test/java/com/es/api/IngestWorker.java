@@ -9,8 +9,8 @@ import java.util.concurrent.TimeUnit;
 import org.apache.log4j.*;
 import org.junit.Assert;
 
-import com.es.api.IOHandler;
-import com.es.api.IOIface;
+import com.es.api.ClientImpl;
+import com.es.api.ClientIFace;
 import com.es.rax.RaxLocator;
 
 import static com.es.rax.RaxLocator.*;
@@ -27,7 +27,7 @@ public final class IngestWorker implements Runnable{
 		double sum = 0.0;
 		int failures = 0;
 		for (int count=0; count<numDocs; count++) {
-			IOIface handler = new IOHandler();
+			ClientIFace handler = new ClientImpl();
 			Map<String, String> map = RaxLocator.generateRaxLocatordata(UUID.randomUUID().toString(), 
 					UUID.randomUUID().toString(), UUID.randomUUID().toString());
 

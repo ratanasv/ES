@@ -8,14 +8,14 @@ import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.cluster.metadata.IndexMetaData;
 
-import com.es.client.ElasticClient;
+import com.es.client.ClientManager;
 
 class InitIndices {
 	private static final Logger log = Logger.getLogger(InitIndices.class);
 	private int numIndices = 128;
 
 	public void init() {
-		Client client = ElasticClient.getClient();
+		Client client = ClientManager.getClient();
 		int index = 0;
 		for(; index<numIndices; index++) {
 			log.info("index=" + index);
