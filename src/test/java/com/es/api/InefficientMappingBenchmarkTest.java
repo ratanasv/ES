@@ -6,6 +6,9 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import junit.framework.Assert;
 
@@ -26,10 +29,11 @@ public class InefficientMappingBenchmarkTest {
 	private static final Logger log = Logger.getLogger(InefficientMappingBenchmarkTest.class);
 	private static final String tenantId = TENANT_ID.getPrefix() + "Asdfqwer";
 	private static final String index = "test-index-55"; //matched the tenantId above.
+	private static final int iter = 1000;
 
 	@Test
-	public void manyFieldsMapping() throws IOException {
-		final int iter = 1000;
+	public void manyFieldsMapping() throws IOException, InterruptedException, ExecutionException {
+		
 		clearMapping(index);
 		ClientIFace handler = new ClientImpl();
 		for (int i=0; i<iter; i++) {
@@ -37,22 +41,23 @@ public class InefficientMappingBenchmarkTest {
 			map.put("useless-"+i, String.valueOf(UUID.randomUUID()));
 			handler.insert(tenantId, map);
 		}
-
+		//sleep to let ES catch up.
+		TimeUnit.SECONDS.sleep(10);
 		ClientManager.getClient().admin().indices().prepareRefresh().execute().actionGet();
 
 		StopWatch watch = new StopWatch().start();
 		for (int i=0; i<iter; i++) {
 			Map<String, String> query = new HashMap<String, String>();
 			query.put("useless-"+i, "*");
-			List<Map<String, Object>> result = handler.search(tenantId, query);
-			Assert.assertEquals(iter/4, result.size());
+			Future<List<Map<String, Object>>> result = handler.search(tenantId, query);
+			Assert.assertEquals(1, result.get().size());
 		}
 		log.info("many-field-mapping took " + watch.stop().lastTaskTime().getMillis());
 		clearMapping(index);
 	}
 	
 	@Test
-	public void fewFieldsMapping() throws IOException {
+	public void fewFieldsMapping() throws IOException, InterruptedException, ExecutionException {
 		clearMapping(index);
 		ClientIFace handler = new ClientImpl();
 		for (int i=0; i<1000; i++) {
@@ -60,15 +65,16 @@ public class InefficientMappingBenchmarkTest {
 			map.put("useless-"+ (i%4), String.valueOf(UUID.randomUUID()));
 			handler.insert(tenantId, map);
 		}
-
+		//sleep to let ES catch up.
+		TimeUnit.SECONDS.sleep(10);
 		ClientManager.getClient().admin().indices().prepareRefresh().execute().actionGet();
 
 		StopWatch watch = new StopWatch().start();
 		for (int i=0; i<1000; i++) {
 			Map<String, String> query = new HashMap<String, String>();
 			query.put("useless-"+ (i%4), "*");
-			List<Map<String, Object>> result = handler.search(tenantId, query);
-			Assert.assertEquals(1, result.size());
+			Future<List<Map<String, Object>>> result = handler.search(tenantId, query);
+			Assert.assertEquals(iter/4, result.get().size());
 		}
 		log.info("few-field-mapping took " + watch.stop().lastTaskTime().getMillis());
 		clearMapping(index);

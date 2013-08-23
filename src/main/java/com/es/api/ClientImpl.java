@@ -43,15 +43,15 @@ public class ClientImpl implements ClientIFace {
 				} catch (IOException ie) {
 					return false;
 				}
-				IndexResponse response = client.prepareIndex(getIndex(tenantId), ES_TYPE)
+				// Async, this method won't block.
+				Future<IndexResponse> f = client.prepareIndex(getIndex(tenantId), ES_TYPE)
 						//.setId(getId(content))
 						.setId(getId(tenantId, map))
 						.setRouting(getRouting(tenantId))
 						.setSource(content)
 						//.setVersion(1)
 						//.setVersionType(VersionType.EXTERNAL)
-						.execute()
-						.actionGet();
+						.execute();
 				return true;
 			}
 			
