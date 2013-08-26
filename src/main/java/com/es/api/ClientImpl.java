@@ -20,14 +20,18 @@ import org.elasticsearch.search.SearchHit;
 import com.es.client.ClientManager;
 import com.es.processor.ExecutionPolicy;
 
-import static com.es.rax.RaxLocator.*;
-
+import static com.es.api.ClientImpl.ESKeys.*;
 
 public class ClientImpl implements ClientIFace {
 	private static final Logger log = Logger.getLogger(ClientImpl.class);
 	private static Client client = ClientManager.getClient();
 	// currently not that useful at the moment.
 	private static final String ES_TYPE = "metrics";
+	
+	static enum ESKeys {
+		TENANT_ID,
+		LOCATOR;
+	}
 
 	@Override
 	public Future<Boolean> insert(final String tenantId, final InsertRequest request) {

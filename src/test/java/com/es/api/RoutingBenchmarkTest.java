@@ -17,10 +17,9 @@ import org.junit.Test;
 
 import com.es.client.ClientManager;
 import com.es.processor.ExecutionPolicy;
-import com.es.rax.RaxLocator;
 import com.es.util.ClearIndexWorker;
 
-import static com.es.rax.RaxLocator.*;
+import static com.es.api.RaxLocator.*;
 
 
 public class RoutingBenchmarkTest {
@@ -37,7 +36,7 @@ public class RoutingBenchmarkTest {
 		handler = new ClientImpl();
 		log.info("benchmarking numDocs="+RoutingBenchmarkTest.numDocs);
 		for (int i=0; i<numDocs; i++) {
-			handler.insert(tenantId, RaxLocator.generateRaxLocatordata(
+			handler.insert(tenantId, ESKeys.generateRaxLocatordata(
 					UUID.randomUUID().toString(), 
 					UUID.randomUUID().toString(), 
 					UUID.randomUUID().toString()));

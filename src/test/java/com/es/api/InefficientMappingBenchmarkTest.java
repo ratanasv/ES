@@ -1,6 +1,6 @@
 package com.es.api;
 
-import static com.es.rax.RaxLocator.TENANT_ID;
+import static com.es.api.RaxLocator.TENANT_ID;
 
 import java.io.IOException;
 import java.util.HashMap;
