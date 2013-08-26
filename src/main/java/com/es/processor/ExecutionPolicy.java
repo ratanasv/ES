@@ -9,6 +9,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ExecutionPolicy {
 	private static int corePoolSize = 16;
@@ -19,18 +20,36 @@ public class ExecutionPolicy {
 	private static BlockingQueue<Runnable> workQueue = new LinkedBlockingQueue<Runnable>(capacity);
 	private static final ExecutorService EXECUTOR_SERVICE;
 	private static final CompletionService<Object> COMPLETION_SERVICE;
-	
+	private static AtomicInteger outstandingTasks = new AtomicInteger(0);
+
 	static {
 		ThreadPoolExecutor exec = new ThreadPoolExecutor(
-				corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue);
+				corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue) {
+
+			@Override
+			protected void afterExecute(Runnable arg0, Throwable arg1) {
+				outstandingTasks.decrementAndGet();
+			}
+
+			@Override
+			protected void beforeExecute(Thread arg0, Runnable arg1) {
+				outstandingTasks.incrementAndGet();
+			}
+
+
+		};
 		exec.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
-		
 		EXECUTOR_SERVICE = exec;
 		COMPLETION_SERVICE = new ExecutorCompletionService<Object>(EXECUTOR_SERVICE);
 	}
-	
+
 	public static ExecutorService getExecutorService() {
 		return EXECUTOR_SERVICE;
 	}
 	
+	public static int getNumOutstandingTasks() {
+		return outstandingTasks.get();
+	}
+
+
 }
