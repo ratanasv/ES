@@ -23,6 +23,7 @@ public class ExecutionPolicy {
 	private static AtomicInteger outstandingTasks = new AtomicInteger(0);
 
 	static {
+		// subclassed to keep track how many outstanding tasks there are.
 		ThreadPoolExecutor exec = new ThreadPoolExecutor(
 				corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue) {
 
@@ -49,6 +50,12 @@ public class ExecutionPolicy {
 	
 	public static int getNumOutstandingTasks() {
 		return outstandingTasks.get();
+	}
+	
+	public static void blockUntilNoTasksLeft() {
+		while (getNumOutstandingTasks() != 0) {
+		
+		}
 	}
 
 

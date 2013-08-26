@@ -23,7 +23,7 @@ import org.elasticsearch.common.xcontent.XContentFactory;
 import org.junit.Test;
 
 import com.es.client.ClientManager;
-import com.es.worker.ClearIndexWorker;
+import com.es.util.ClearIndexWorker;
 
 public class InefficientMappingBenchmarkTest {
 	private static final Logger log = Logger.getLogger(InefficientMappingBenchmarkTest.class);

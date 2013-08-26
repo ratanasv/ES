@@ -17,7 +17,7 @@ import org.junit.Test;
 
 import com.es.client.ClientManager;
 import com.es.rax.RaxLocator;
-import com.es.worker.ClearIndexWorker;
+import com.es.util.ClearIndexWorker;
 
 import static com.es.rax.RaxLocator.*;
 

@@ -9,38 +9,50 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 import org.elasticsearch.action.count.CountResponse;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import com.es.client.ClientManager;
+import com.es.processor.ExecutionPolicy;
 import com.es.rax.RaxLocator;
-import com.es.worker.ClearIndexWorker;
+import com.es.util.ClearIndexWorker;
 
 import static com.es.rax.RaxLocator.*;
 
 public class IndexingTest {
 	private static final Logger log = Logger.getLogger(IndexingTest.class);
-	@Test
-	public void testThatIndexingOccurs() throws InterruptedException, ExecutionException {
-		int numDocs = 100;
-		ClientIFace handler = new ClientImpl();
+	private static final int NUM_DOCS = 100;
+	private static final ClientIFace HANDLER = new ClientImpl();
+	private static final String ARBITRARY_TENANT_ID = TENANT_ID.getPrefix() + "Asdfqwer";
+	
+	@Before
+	public void setup() {
 		ClearIndexWorker.clear("all");
-		String tenantId = TENANT_ID.getPrefix() + "Asdfqwer";
-		for (int i=0; i<numDocs; i++) {
+		for (int i=0; i<NUM_DOCS; i++) {
 			Map<String, String> map = RaxLocator.generateRaxLocatordata(String.valueOf(i), String.valueOf(i), 
 					String.valueOf(i));
-			handler.insert(tenantId, map);
+			HANDLER.insert(ARBITRARY_TENANT_ID, map);
 		}
-		TimeUnit.SECONDS.sleep(10);
-		
+		ExecutionPolicy.blockUntilNoTasksLeft();
 		ClientManager.getClient().admin().indices().prepareRefresh().execute().actionGet();
-		for (int i=0; i<numDocs; i++) {
+	}
+	
+	@Test
+	public void testThatIndexingOccurs() throws InterruptedException, ExecutionException {
+		for (int i=0; i<NUM_DOCS; i++) {
 			Map<String, String> query = new HashMap<String, String>();
 			query.put(ENTITY_ID.toString(), ENTITY_ID.getPrefix()+String.valueOf(i));
-			Future<List<Map<String, Object>>> result = handler.search(tenantId, query);
+			Future<List<Map<String, Object>>> result = HANDLER.search(ARBITRARY_TENANT_ID, query);
 			Assert.assertEquals(1, result.get().size());
 			log.debug(result.toString());
 		}
+		
+	}
+	
+	@After
+	public void cleanup() {
 		ClearIndexWorker.clear("all");
 		CountResponse countRes = ClientManager.getClient().prepareCount().execute().actionGet();
 		Assert.assertEquals(countRes.getCount(), 0);

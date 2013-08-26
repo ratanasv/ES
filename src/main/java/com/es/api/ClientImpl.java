@@ -40,7 +40,6 @@ public class ClientImpl implements ClientIFace {
 				} catch (IOException ie) {
 					return false;
 				}
-				// Async, this method won't block.
 				IndexResponse indexRes = client.prepareIndex(getIndex(tenantId), ES_TYPE)
 						//.setId(getId(content))
 						.setId(getId(tenantId, map))
@@ -103,6 +102,10 @@ public class ClientImpl implements ClientIFace {
 		return "test-index-" + String.valueOf(Math.abs(tenantId.hashCode() % 128));
 	}
 
+	/** All requests from the same tenant should go to the same shard.
+	 * @param tenantId
+	 * @return 
+	 */
 	private String getRouting(String tenantId) {
 		return tenantId;
 	}

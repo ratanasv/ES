@@ -1,4 +1,4 @@
-package com.es.worker;
+package com.es.util;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -57,22 +57,7 @@ public class ClearIndexWorker implements Runnable {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		if (args.length == 0) {
-			log.info("nothing to do");
-			System.exit(1);
-		}
-		
-		ExecutorService exec = Executors.newCachedThreadPool();
-		for (String s: args) {
-			log.info("clearing " + s);
-			exec.execute(new ClearIndexWorker(s));
-		}
-		exec.shutdown();
-		try {
-			exec.awaitTermination(7, TimeUnit.MINUTES);
-		} catch (InterruptedException e) {
-			Assert.fail("waiting for threads failed");
-		}
+		ClearIndexWorker.clear(args);
 	}
 
 	
