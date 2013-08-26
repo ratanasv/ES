@@ -20,8 +20,11 @@ public class ExecutionPolicy {
 	private static final CompletionService<Object> COMPLETION_SERVICE;
 	
 	static {
-		EXECUTOR_SERVICE = new ThreadPoolExecutor(
+		ThreadPoolExecutor exec = new ThreadPoolExecutor(
 				corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue);
+		exec.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+		
+		EXECUTOR_SERVICE = exec;
 		COMPLETION_SERVICE = new ExecutorCompletionService<Object>(EXECUTOR_SERVICE);
 	}
 	

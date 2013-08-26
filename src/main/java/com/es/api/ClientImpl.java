@@ -28,9 +28,6 @@ public class ClientImpl implements ClientIFace {
 	private static Client client = ClientManager.getClient();
 	// currently not that useful at the moment.
 	private static final String ES_TYPE = "metrics";
-	
-	//private static final ExecutorService insertExec = new ThreadPoolExecutor(
-	//		arg0, arg1, arg2, arg3, arg4)
 
 	@Override
 	public Future<Boolean> insert(final String tenantId, final Map<String, String> map) {
@@ -44,14 +41,16 @@ public class ClientImpl implements ClientIFace {
 					return false;
 				}
 				// Async, this method won't block.
-				Future<IndexResponse> f = client.prepareIndex(getIndex(tenantId), ES_TYPE)
+				IndexResponse indexRes = client.prepareIndex(getIndex(tenantId), ES_TYPE)
 						//.setId(getId(content))
 						.setId(getId(tenantId, map))
 						.setRouting(getRouting(tenantId))
 						.setSource(content)
 						//.setVersion(1)
 						//.setVersionType(VersionType.EXTERNAL)
-						.execute();
+						.execute()
+						.actionGet();
+				log.debug("index=" + indexRes.getIndex() + " id=" + indexRes.getId() + " version=" + indexRes.getVersion());
 				return true;
 			}
 			
@@ -110,7 +109,8 @@ public class ClientImpl implements ClientIFace {
 	
 	
 	/**
-	 * WARNING: XContentBuilder does not implement equals and hashCode, so this method is obsolete.
+	 * WARNING: XContentBuilder does not implement equals and hashCode, so this method is not truthy.
+	 * i.e. for any XContentBuilder A and B, if A.equals(B) then A.hashCode might not be equalto B.hashCode.
 	 * @param content
 	 * @return
 	 */
@@ -120,6 +120,7 @@ public class ClientImpl implements ClientIFace {
 	
 	/** Return the hashCode which can be used as the "id" of the arguments. 
 	 * This is implemented since XContentBuilder does not.
+	 * WARNING: 
 	 * @param tenantId
 	 * @param map
 	 * @return hashCode (or "id").
