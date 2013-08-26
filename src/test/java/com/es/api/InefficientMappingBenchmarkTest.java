@@ -30,7 +30,7 @@ public class InefficientMappingBenchmarkTest {
 	private static final Logger log = Logger.getLogger(InefficientMappingBenchmarkTest.class);
 	private static final String tenantId = TENANT_ID.getPrefix() + "Asdfqwer";
 	private static final String index = "test-index-55"; //matched the tenantId above.
-	private static final int ITER = 100;
+	private static final int ITER = 500;
 
 	@Test
 	public void manyFieldsMapping() throws IOException, InterruptedException, ExecutionException {

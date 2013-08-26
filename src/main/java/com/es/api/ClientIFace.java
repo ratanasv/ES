@@ -5,24 +5,10 @@ import java.util.Map;
 import java.util.concurrent.Future;
 
 public interface ClientIFace {
+
+	public Future<Boolean> insert(String tenantId, InsertRequest request);
 	
-	/**
-	 * Insert key-value pairs with a specific tenantId into an ES cluster.
-	 * @param tenantId self-explanatory.
-	 * @param map key-value pairs.
-	 * @return Future representing true if insert succeeds, false otherwise.
-	 */
-	public Future<Boolean> insert(String tenantId, Map<String, Object> map);
-	
-	
-	/** 
-	 * Search for entries with a query. This will return a future of a list of "sources", where each source is
-	 * the key-value pairs you inserted earlier.
-	 * @param tenantId self-explanatory.
-	 * @param query key-value pairs where each value could contain the wildcard character (*). 
-	 * @return Future representing a list of sources you inserted earlier.
-	 */
-	public Future<List<Map<String, Object>>> search(String tenantId, Map<String, String> query);
+	public Future<List<String>> getAllMetrics(String tenantId, SearchRequest query);
 	
 	
 }
