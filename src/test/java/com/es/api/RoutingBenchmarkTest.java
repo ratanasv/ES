@@ -19,15 +19,13 @@ import com.es.client.ClientManager;
 import com.es.processor.ExecutionPolicy;
 import com.es.util.ClearIndexWorker;
 
-import static com.es.api.RaxLocator.*;
-
 
 public class RoutingBenchmarkTest {
 
 	private static final Logger log = Logger.getLogger(RoutingBenchmarkTest.class);
 	static int numDocs = 100;
 	static ClientIFace handler = null;
-	private static final String tenantId = TENANT_ID.getPrefix() + "Asdfqwer";
+	private static final String TENANT = "acAsdfqwer";
 	private static final String index = "test-index-55"; //matched the tenantId above.
 	private static final String routing = "2"; //matched the tenantId above.
 
@@ -36,10 +34,8 @@ public class RoutingBenchmarkTest {
 		handler = new ClientImpl();
 		log.info("benchmarking numDocs="+RoutingBenchmarkTest.numDocs);
 		for (int i=0; i<numDocs; i++) {
-			handler.insert(tenantId, ESKeys.generateRaxLocatordata(
-					UUID.randomUUID().toString(), 
-					UUID.randomUUID().toString(), 
-					UUID.randomUUID().toString()));
+			InsertRequest req = new InsertRequest.Builder("a0.b0.c0.d0.e0.f0").build();
+			handler.insert(TENANT, req);
 		}
 		ExecutionPolicy.blockUntilNoTasksLeft();
 	}
@@ -60,13 +56,12 @@ public class RoutingBenchmarkTest {
 		log.info("health="+healthRes.getStatus().toString());
 		StopWatch stopWatch = new StopWatch().start();
 		for (int i=0; i<numDocs; i++) {
-
 			SearchResponse searchRes = ClientManager.getClient()
 					.prepareSearch(index)
 					.setQuery(
-							QueryBuilders.queryString(TENANT_ID.toString() + ":" + TENANT_ID.getPrefix() + "*")
+							QueryBuilders.queryString("LOCATOR" + ":" + "*")
 							.analyzeWildcard(true))
-					.execute().actionGet();
+							.execute().actionGet();
 			log.debug("case:" + i + " found:" + searchRes.getHits().getTotalHits());
 			Assert.assertTrue("search result empty", searchRes.getHits().getTotalHits() > 0);
 		}
@@ -86,15 +81,15 @@ public class RoutingBenchmarkTest {
 		for (int i=0; i<numDocs; i++) {
 			SearchResponse searchRes = ClientManager.getClient()
 					.prepareSearch(index)
-					.setRouting(tenantId)
+					.setRouting(TENANT)
 					.setQuery(
-							QueryBuilders.queryString(TENANT_ID.toString() + ":" + TENANT_ID.getPrefix() + "*")
+							QueryBuilders.queryString("LOCATOR" + ":" + "*")
 							.analyzeWildcard(true))
-					.execute().actionGet();
+							.execute().actionGet();
 			log.debug("case:" + i + " found:" + searchRes.getHits().getTotalHits());
 			Assert.assertTrue("search result empty", searchRes.getHits().getTotalHits() > 0);
 		}
 		log.info("with routing time="+stopWatch.stop().lastTaskTime().getMillis());
 	}
-	
+
 }

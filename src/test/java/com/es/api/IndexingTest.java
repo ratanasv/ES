@@ -44,8 +44,8 @@ public class IndexingTest {
 			Assert.assertEquals(NUM_DOCS, result.get().size());
 			log.debug(result.toString());
 		}
-		
 	}
+	
 	
 	@After
 	public void cleanup() {
