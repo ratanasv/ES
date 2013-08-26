@@ -8,7 +8,7 @@ public interface ClientIFace {
 
 	public Future<Boolean> insert(String tenantId, InsertRequest request);
 	
-	public Future<List<String>> getAllMetrics(String tenantId, SearchRequest query);
+	public Future<List<String>> getAllLocators(String tenantId, SearchRequest query);
 	
 	
 }

@@ -73,7 +73,7 @@ public class ClientImpl implements ClientIFace {
 	}
 
 	@Override
-	public Future<List<String>> getAllMetrics(final String tenantId, final SearchRequest query) {
+	public Future<List<String>> getAllLocators(final String tenantId, final SearchRequest query) {
 		return ExecutionPolicy.submit(new Callable<List<String>>() {
 			@Override
 			public List<String> call() throws Exception {

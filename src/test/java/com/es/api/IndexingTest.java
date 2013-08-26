@@ -18,21 +18,19 @@ import com.es.client.ClientManager;
 import com.es.processor.ExecutionPolicy;
 import com.es.util.ClearIndexWorker;
 
-import static com.es.api.RaxLocator.*;
 
 public class IndexingTest {
 	private static final Logger log = Logger.getLogger(IndexingTest.class);
 	private static final int NUM_DOCS = 100;
 	private static final ClientIFace HANDLER = new ClientImpl();
-	private static final String ARBITRARY_TENANT_ID = TENANT_ID.getPrefix() + "Asdfqwer";
+	private static final String ARBITRARY_TENANT = "ratanasv";
 	
 	@Before
 	public void setup() {
 		ClearIndexWorker.clear("all");
 		for (int i=0; i<NUM_DOCS; i++) {
-			Map<String, Object> map = ESKeys.generateRaxLocatordata(String.valueOf(i), String.valueOf(i), 
-					String.valueOf(i));
-			HANDLER.insert(ARBITRARY_TENANT_ID, map);
+			InsertRequest req = new InsertRequest.Builder("a0.b" + i + ".c" + i + ".e" + i).build();
+			HANDLER.insert(ARBITRARY_TENANT, req);
 		}
 		ExecutionPolicy.blockUntilNoTasksLeft();
 		ClientManager.getClient().admin().indices().prepareRefresh().execute().actionGet();
@@ -41,13 +39,9 @@ public class IndexingTest {
 	@Test
 	public void testThatIndexingOccurs() throws InterruptedException, ExecutionException {
 		for (int i=0; i<NUM_DOCS; i++) {
-			Map<String, String> query = new HashMap<String, String>();
-			query.put(ENTITY_ID.toString(), ENTITY_ID.getPrefix()+String.valueOf(i));
-			Future<List<Map<String, Object>>> result = HANDLER.search(ARBITRARY_TENANT_ID, query);
-			Assert.assertEquals(1, result.get().size());
-			Map<String, Object> map = ESKeys.generateRaxLocatordata(String.valueOf(i), String.valueOf(i), 
-					String.valueOf(i));
-			Assert.assertEquals(map, result.get().get(0));
+			SearchRequest query = new SearchRequest.Builder().locatorQuery("a0.*").build();
+			Future<List<String>> result = HANDLER.getAllLocators(ARBITRARY_TENANT, query);
+			Assert.assertEquals(NUM_DOCS, result.get().size());
 			log.debug(result.toString());
 		}
 		
