@@ -16,6 +16,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.es.client.ClientManager;
+import com.es.processor.ExecutionPolicy;
 import com.es.rax.RaxLocator;
 import com.es.util.ClearIndexWorker;
 
@@ -41,8 +42,7 @@ public class RoutingBenchmarkTest {
 					UUID.randomUUID().toString(), 
 					UUID.randomUUID().toString()));
 		}
-		//sleep to let ES catch up.
-		TimeUnit.SECONDS.sleep(10);
+		ExecutionPolicy.blockUntilNoTasksLeft();
 	}
 
 	@AfterClass

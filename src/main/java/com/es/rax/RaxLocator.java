@@ -14,8 +14,8 @@ public enum RaxLocator {
 	public String getPrefix() {
 		return this.prefix;
 	}
-	public static Map<String, String> generateRaxLocatordata(String entityId, String checkId, String metric) {
-		Map<String, String> map = new HashMap<String,String>();
+	public static Map<String, Object> generateRaxLocatordata(String entityId, String checkId, String metric) {
+		Map<String, Object> map = new HashMap<String,Object>();
 		map.put(ENTITY_ID.toString(), ENTITY_ID.getPrefix()+entityId);
 		map.put(CHECK_ID.toString(), CHECK_ID.getPrefix()+checkId);
 		map.put(METRIC.toString(), METRIC.getPrefix()+metric);

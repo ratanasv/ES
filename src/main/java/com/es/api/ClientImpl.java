@@ -30,8 +30,8 @@ public class ClientImpl implements ClientIFace {
 	private static final String ES_TYPE = "metrics";
 
 	@Override
-	public Future<Boolean> insert(final String tenantId, final Map<String, String> map) {
-		return ExecutionPolicy.getExecutorService().submit(new Callable<Boolean>() {
+	public Future<Boolean> insert(final String tenantId, final Map<String, Object> map) {
+		return ExecutionPolicy.submit(new Callable<Boolean>() {
 			@Override
 			public Boolean call() throws Exception {
 				XContentBuilder content;
@@ -53,13 +53,13 @@ public class ClientImpl implements ClientIFace {
 				return true;
 			}
 			
-			private XContentBuilder createSourceContent(String tenantId, Map<String, String> map) throws IOException {
+			private XContentBuilder createSourceContent(String tenantId, Map<String, Object> map) throws IOException {
 				XContentBuilder json = XContentFactory.jsonBuilder().startObject();
 				// map might already contain tenantId already.
 				if (!map.containsKey(TENANT_ID.toString())) {
 					json = json.field(TENANT_ID.toString(), tenantId);
 				}
-				for (Map.Entry<String, String> entry : map.entrySet()) {
+				for (Map.Entry<String, Object> entry : map.entrySet()) {
 					json = json.field(entry.getKey(), entry.getValue());
 				}
 				json = json.endObject();
@@ -70,7 +70,7 @@ public class ClientImpl implements ClientIFace {
 
 	@Override
 	public Future<List<Map<String, Object>>> search(final String tenantId, final Map<String, String> query) {
-		return ExecutionPolicy.getExecutorService().submit(new Callable<List<Map<String, Object>>>() {
+		return ExecutionPolicy.submit(new Callable<List<Map<String, Object>>>() {
 			@Override
 			public List<Map<String, Object>> call() throws Exception {
 				List<Map<String, Object>> matched = new ArrayList<Map<String,Object>>();
@@ -78,7 +78,9 @@ public class ClientImpl implements ClientIFace {
 		    	SearchResponse searchRes = request.execute().actionGet();
 		    	for (SearchHit hit : searchRes.getHits().getHits()) {
 		    		log.debug("id=" + hit.getId() + ", shard=" + hit.getShard() + ", version=" + hit.version());
-		    		matched.add(hit.getSource());
+		    		Map<String, Object> result = hit.getSource();
+		    		result.remove(TENANT_ID.toString());
+		    		matched.add(result);
 		    	}
 		    	return matched;
 			}
@@ -89,7 +91,7 @@ public class ClientImpl implements ClientIFace {
 					.setRouting(getRouting(tenantId))
 					.setVersion(true)
 					.setQuery(QueryBuilders.fieldQuery(TENANT_ID.toString(), tenantId).analyzeWildcard(true));
-				for(Map.Entry<String, String> entry : map.entrySet()) {
+				for (Map.Entry<String, String> entry : map.entrySet()) {
 					request = request.setQuery(QueryBuilders.fieldQuery(entry.getKey(), entry.getValue()).analyzeWildcard(true));
 				}
 				return request;
@@ -128,7 +130,7 @@ public class ClientImpl implements ClientIFace {
 	 * @param map
 	 * @return hashCode (or "id").
 	 */
-	private String getId(String tenantId, Map<String, String> map) {
+	private String getId(String tenantId, Map<String, Object> map) {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((map == null) ? 0 : map.hashCode());

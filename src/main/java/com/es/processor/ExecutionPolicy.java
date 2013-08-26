@@ -44,8 +44,9 @@ public class ExecutionPolicy {
 		COMPLETION_SERVICE = new ExecutorCompletionService<Object>(EXECUTOR_SERVICE);
 	}
 
-	public static ExecutorService getExecutorService() {
-		return EXECUTOR_SERVICE;
+	
+	public static <T> Future<T> submit(Callable<T> task) {
+		return EXECUTOR_SERVICE.submit(task);
 	}
 	
 	public static int getNumOutstandingTasks() {

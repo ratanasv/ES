@@ -12,7 +12,7 @@ public interface ClientIFace {
 	 * @param map key-value pairs.
 	 * @return Future representing true if insert succeeds, false otherwise.
 	 */
-	public Future<Boolean> insert(String tenantId, Map<String, String> map);
+	public Future<Boolean> insert(String tenantId, Map<String, Object> map);
 	
 	
 	/** 

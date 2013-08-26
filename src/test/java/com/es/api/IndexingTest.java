@@ -31,7 +31,7 @@ public class IndexingTest {
 	public void setup() {
 		ClearIndexWorker.clear("all");
 		for (int i=0; i<NUM_DOCS; i++) {
-			Map<String, String> map = RaxLocator.generateRaxLocatordata(String.valueOf(i), String.valueOf(i), 
+			Map<String, Object> map = RaxLocator.generateRaxLocatordata(String.valueOf(i), String.valueOf(i), 
 					String.valueOf(i));
 			HANDLER.insert(ARBITRARY_TENANT_ID, map);
 		}
@@ -46,6 +46,9 @@ public class IndexingTest {
 			query.put(ENTITY_ID.toString(), ENTITY_ID.getPrefix()+String.valueOf(i));
 			Future<List<Map<String, Object>>> result = HANDLER.search(ARBITRARY_TENANT_ID, query);
 			Assert.assertEquals(1, result.get().size());
+			Map<String, Object> map = RaxLocator.generateRaxLocatordata(String.valueOf(i), String.valueOf(i), 
+					String.valueOf(i));
+			Assert.assertEquals(map, result.get().get(0));
 			log.debug(result.toString());
 		}
 		

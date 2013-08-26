@@ -23,30 +23,32 @@ import org.elasticsearch.common.xcontent.XContentFactory;
 import org.junit.Test;
 
 import com.es.client.ClientManager;
+import com.es.processor.ExecutionPolicy;
 import com.es.util.ClearIndexWorker;
 
 public class InefficientMappingBenchmarkTest {
 	private static final Logger log = Logger.getLogger(InefficientMappingBenchmarkTest.class);
 	private static final String tenantId = TENANT_ID.getPrefix() + "Asdfqwer";
 	private static final String index = "test-index-55"; //matched the tenantId above.
-	private static final int iter = 1000;
+	private static final int ITER = 100;
 
 	@Test
 	public void manyFieldsMapping() throws IOException, InterruptedException, ExecutionException {
 		
 		clearMapping(index);
 		ClientIFace handler = new ClientImpl();
-		for (int i=0; i<iter; i++) {
-			Map<String, String> map = new HashMap<String, String>();
+		StopWatch watch = new StopWatch().start();
+		for (int i=0; i<ITER; i++) {
+			Map<String, Object> map = new HashMap<String, Object>();
 			map.put("useless-"+i, String.valueOf(UUID.randomUUID()));
 			handler.insert(tenantId, map);
 		}
-		//sleep to let ES catch up.
-		TimeUnit.SECONDS.sleep(10);
+		
+		ExecutionPolicy.blockUntilNoTasksLeft();
 		ClientManager.getClient().admin().indices().prepareRefresh().execute().actionGet();
 
-		StopWatch watch = new StopWatch().start();
-		for (int i=0; i<iter; i++) {
+		
+		for (int i=0; i<ITER; i++) {
 			Map<String, String> query = new HashMap<String, String>();
 			query.put("useless-"+i, "*");
 			Future<List<Map<String, Object>>> result = handler.search(tenantId, query);
@@ -60,21 +62,22 @@ public class InefficientMappingBenchmarkTest {
 	public void fewFieldsMapping() throws IOException, InterruptedException, ExecutionException {
 		clearMapping(index);
 		ClientIFace handler = new ClientImpl();
-		for (int i=0; i<1000; i++) {
-			Map<String, String> map = new HashMap<String, String>();
+		StopWatch watch = new StopWatch().start();
+		for (int i=0; i<ITER; i++) {
+			Map<String, Object> map = new HashMap<String, Object>();
 			map.put("useless-"+ (i%4), String.valueOf(UUID.randomUUID()));
 			handler.insert(tenantId, map);
 		}
-		//sleep to let ES catch up.
-		TimeUnit.SECONDS.sleep(10);
+		
+		ExecutionPolicy.blockUntilNoTasksLeft();
 		ClientManager.getClient().admin().indices().prepareRefresh().execute().actionGet();
 
-		StopWatch watch = new StopWatch().start();
-		for (int i=0; i<1000; i++) {
+		
+		for (int i=0; i<ITER; i++) {
 			Map<String, String> query = new HashMap<String, String>();
 			query.put("useless-"+ (i%4), "*");
 			Future<List<Map<String, Object>>> result = handler.search(tenantId, query);
-			Assert.assertEquals(iter/4, result.get().size());
+			Assert.assertEquals(ITER/4, result.get().size());
 		}
 		log.info("few-field-mapping took " + watch.stop().lastTaskTime().getMillis());
 		clearMapping(index);
