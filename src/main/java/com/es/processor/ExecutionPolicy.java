@@ -15,7 +15,8 @@ public class ExecutionPolicy {
 	private static int maximumPoolSize = 16;
 	private static long keepAliveTime = 2;
 	private static TimeUnit unit = TimeUnit.MINUTES;
-	private static BlockingQueue<Runnable> workQueue = new LinkedBlockingQueue<Runnable>();
+	private static int capacity = 999999;
+	private static BlockingQueue<Runnable> workQueue = new LinkedBlockingQueue<Runnable>(capacity);
 	private static final ExecutorService EXECUTOR_SERVICE;
 	private static final CompletionService<Object> COMPLETION_SERVICE;
 	
