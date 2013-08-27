@@ -77,11 +77,18 @@ public class IndexingTest {
 		Future<List<String>> result = HANDLER.getAllLocators(TENANT, query);
 		Assert.assertEquals("common annotation", NUM_DOCS, result.get().size());
 		
+		query = new SearchRequest.Builder().locatorQuery("alpha.*.omega0").annotationQuery(annotation).build();
+		result = HANDLER.getAllLocators(TENANT, query);
+		Assert.assertEquals("annotation with locator", 1, result.get().size());
+		
 		annotation = new HashMap<String, Object>();
 		annotation.put("long-val", "5");
 		query = new SearchRequest.Builder().annotationQuery(annotation).build();
 		result = HANDLER.getAllLocators(TENANT, query);
 		Assert.assertEquals("unique annotation", 1, result.get().size());
+		
+		
+		
 	}
 	
 	@AfterClass
