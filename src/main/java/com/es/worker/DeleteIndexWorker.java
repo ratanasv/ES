@@ -8,7 +8,7 @@ import org.apache.log4j.Logger;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
 import org.junit.Assert;
 
-import com.es.client.ElasticClient;
+import com.es.client.ClientManager;
 
 public class DeleteIndexWorker implements Runnable {
 	private static final Logger log = Logger.getLogger(DeleteIndexWorker.class);
@@ -17,11 +17,11 @@ public class DeleteIndexWorker implements Runnable {
 	public void run() {
 		DeleteIndexResponse deleteRes;
 		if (indexToDelete.equals("all")) {
-			deleteRes = ElasticClient.getClient().admin().indices().prepareDelete().execute().actionGet();
+			deleteRes = ClientManager.getClient().admin().indices().prepareDelete().execute().actionGet();
 		} else {
-			deleteRes = ElasticClient.getClient().admin().indices().prepareDelete(indexToDelete).execute().actionGet();
+			deleteRes = ClientManager.getClient().admin().indices().prepareDelete(indexToDelete).execute().actionGet();
 		}
-		log.info(indexToDelete + " deleted, health=" + ElasticClient.getClient()
+		log.info(indexToDelete + " deleted, health=" + ClientManager.getClient()
 				.admin().cluster().prepareHealth().execute().actionGet().getStatus().toString());
 		
 	}

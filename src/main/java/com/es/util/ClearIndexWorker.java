@@ -1,4 +1,4 @@
-package com.es.worker;
+package com.es.util;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -11,7 +11,7 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.junit.Assert;
 
-import com.es.client.ElasticClient;
+import com.es.client.ClientManager;
 
 public class ClearIndexWorker implements Runnable {
 	private static final Logger log = Logger.getLogger(ClearIndexWorker.class);
@@ -20,34 +20,27 @@ public class ClearIndexWorker implements Runnable {
 	public void run() {
 		CountResponse countRes;
 		if (indexToClear.equals("all")) {
-			countRes = ElasticClient.getClient().prepareCount().execute().actionGet();
+			countRes = ClientManager.getClient().prepareCount().execute().actionGet();
 		} else {
-			countRes = ElasticClient.getClient().prepareCount(indexToClear).execute().actionGet();
+			countRes = ClientManager.getClient().prepareCount(indexToClear).execute().actionGet();
 		}
 		log.info(indexToClear + ", numDocs=" + countRes.getCount());
 		if (indexToClear.equals("all")) {
-			ElasticClient.getClient().prepareDeleteByQuery()
+			ClientManager.getClient().prepareDeleteByQuery()
 			.setQuery(QueryBuilders.matchAllQuery()).execute().actionGet();
 		} else {
-			ElasticClient.getClient().prepareDeleteByQuery(indexToClear)
+			ClientManager.getClient().prepareDeleteByQuery(indexToClear)
 				.setQuery(QueryBuilders.matchAllQuery()).execute().actionGet();
 		}
-		log.info(indexToClear + " cleared, health=" + ElasticClient.getClient()
+		log.info(indexToClear + " cleared, health=" + ClientManager.getClient()
 				.admin().cluster().prepareHealth().execute().actionGet().getStatus().toString());
 	}
 	
 	public ClearIndexWorker(String s) {
 		this.indexToClear = s;
 	}
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		if (args.length == 0) {
-			log.info("nothing to do");
-			System.exit(1);
-		}
-		
+	
+	public static void clear(String ... args) {
 		ExecutorService exec = Executors.newCachedThreadPool();
 		for (String s: args) {
 			log.info("clearing " + s);
@@ -59,6 +52,12 @@ public class ClearIndexWorker implements Runnable {
 		} catch (InterruptedException e) {
 			Assert.fail("waiting for threads failed");
 		}
+	}
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		ClearIndexWorker.clear(args);
 	}
 
 	
