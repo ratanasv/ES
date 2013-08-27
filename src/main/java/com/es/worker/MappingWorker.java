@@ -9,41 +9,44 @@ import org.elasticsearch.common.xcontent.XContentFactory;
 
 import com.es.client.ClientManager;
 
-final class MappingWorker {
+public class MappingWorker {
 
 	/**
 	 * @param args
 	 * @throws IOException 
 	 */
 	public static void main(String[] args) throws IOException {
+		clear();	
+	}
+	
+	public static void clear() throws IOException {
 		final XContentBuilder content = XContentFactory.jsonBuilder()
-			.startObject()
-				.startObject("metrics")
-					.startObject("properties")
-						.startObject("accountId")
-							.field("type", "string")
-						.endObject()
-						.startObject("entityId")
-							.field("type", "string")
-						.endObject()
-						.startObject("checkId")
-							.field("type", "string")
-						.endObject()
-						.startObject("metric")
-							.field("type", "string")
-						.endObject()
-						.startObject("unusedField")
-							.field("type", "string")
+				.startObject()
+					.startObject("metrics")
+						.startObject("properties")
+							.startObject("accountId")
+								.field("type", "string")
+							.endObject()
+							.startObject("entityId")
+								.field("type", "string")
+							.endObject()
+							.startObject("checkId")
+								.field("type", "string")
+							.endObject()
+							.startObject("metric")
+								.field("type", "string")
+							.endObject()
+							.startObject("unusedField")
+								.field("type", "string")
+							.endObject()
 						.endObject()
 					.endObject()
-				.endObject()
-			.endObject();
-		
-		DeleteMappingResponse delRes =  ClientManager.getClient().admin().indices().prepareDeleteMapping().setType("metrics")
-			.execute().actionGet();
-		//PutMappingResponse mapRes = ElasticClient.getClient().admin().indices().preparePutMapping("test-index-0")
-		//	.setType("metrics").setSource(content).execute().actionGet();
-		
+				.endObject();
+			
+			DeleteMappingResponse delRes =  ClientManager.getClient().admin().indices().prepareDeleteMapping().setType("metrics")
+				.execute().actionGet();
+			//PutMappingResponse mapRes = ElasticClient.getClient().admin().indices().preparePutMapping("test-index-0")
+			//	.setType("metrics").setSource(content).execute().actionGet();
 	}
 
 }

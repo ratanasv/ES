@@ -1,5 +1,6 @@
 package com.es.api;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +21,7 @@ import org.junit.Test;
 import com.es.client.ClientManager;
 import com.es.processor.ExecutionPolicy;
 import com.es.util.ClearIndexWorker;
+import com.es.worker.MappingWorker;
 
 
 public class IndexingTest {
@@ -31,53 +33,40 @@ public class IndexingTest {
 	private static final String[] greekLetters = {"alpha", "beta", "delta", "gamma", "omega", };
 	
 	@BeforeClass
-	public static void setup() {
+	public static void setup() throws IOException {
 		ClearIndexWorker.clear("all");
-		
 		for (int i=0; i<NUM_DOCS; i++) {
 			Map<String, Object> annotation = new HashMap<String, Object>();
 			annotation.put("foo", "bar");
-			annotation.put("diff-val", i);
-			annotation.put("field"+i, "val"+i);
+			annotation.put("long-val", i);
 			InsertRequest req = new InsertRequest.Builder(bogusLocator(i))
 				.withAnnotation(annotation)
 				.build();
 			HANDLER.insert(TENANT, req);
 		}
-		InsertRequest req = new InsertRequest.Builder("square").build();
 		ExecutionPolicy.blockUntilNoTasksLeft();
-		ClientManager.getClient().admin().indices().prepareRefresh().execute().actionGet();
+		ClientManager.getClient().admin().indices().prepareRefresh(INDEX).execute().actionGet();
 	}
 	
 	@Test
 	public void testWildcard() throws InterruptedException, ExecutionException {
-		SearchRequest query = new SearchRequest.Builder().locatorQuery("alpha0.*").build();
+		SearchRequest query = new SearchRequest.Builder().locatorQuery("alpha*").build();
 		Future<List<String>> result = HANDLER.getAllLocators(TENANT, query);
 		log.debug(result.get().toString());
-		Assert.assertEquals(1, result.get().size());
-		
-		query = new SearchRequest.Builder().locatorQuery("alpha0*").build();
+		Assert.assertEquals("trailing wildcard", NUM_DOCS, result.get().size());
+
+		query = new SearchRequest.Builder().locatorQuery("alpha*omega0").build();
 		result = HANDLER.getAllLocators(TENANT, query);
 		log.debug(result.get().toString());
-		Assert.assertEquals(1, result.get().size());
+		Assert.assertEquals("wildcard in the middle", 1, result.get().size());
+		
 		
 		query = new SearchRequest.Builder().locatorQuery("*omega0").build();
 		result = HANDLER.getAllLocators(TENANT, query);
 		log.debug(result.get().toString());
-		Assert.assertEquals(1, result.get().size());
+		Assert.assertEquals("wildcard in the front", 1, result.get().size());
 		
-		query = new SearchRequest.Builder().locatorQuery("alpha0*omega0").build();
-		result = HANDLER.getAllLocators(TENANT, query);
-		log.debug(result.get().toString());
-		Assert.assertEquals(1, result.get().size());
 		
-		for (int i=0; i<NUM_DOCS; i++) {
-			query = new SearchRequest.Builder().locatorQuery("alpha*.omega" + i).build();
-			result = HANDLER.getAllLocators(TENANT, query);
-			Assert.assertEquals(1, result.get().size());
-			Assert.assertEquals(bogusLocator(i), result.get().get(0));
-			log.debug(result.get().toString());
-		}
 	}
 	
 	@Test
@@ -86,24 +75,31 @@ public class IndexingTest {
 		annotation.put("foo", "bar");
 		SearchRequest query = new SearchRequest.Builder().annotationQuery(annotation).build();
 		Future<List<String>> result = HANDLER.getAllLocators(TENANT, query);
-		Assert.assertEquals(NUM_DOCS, result.get().size());
+		Assert.assertEquals("common annotation", NUM_DOCS, result.get().size());
+		
+		annotation = new HashMap<String, Object>();
+		annotation.put("long-val", "5");
+		query = new SearchRequest.Builder().annotationQuery(annotation).build();
+		result = HANDLER.getAllLocators(TENANT, query);
+		Assert.assertEquals("unique annotation", 1, result.get().size());
 	}
 	
 	@AfterClass
-	public static void cleanup() {
+	public static void cleanup() throws IOException {
 		ClearIndexWorker.clear("all");
 		CountResponse countRes = ClientManager.getClient().prepareCount().execute().actionGet();
 		Assert.assertEquals(countRes.getCount(), 0);
+		
 	}
 	
 	private static String bogusLocator(int i) {
 		StringBuilder builder = new StringBuilder(greekLetters.length * 6);
 		for (int j=0; j<greekLetters.length-1; j++) {
 			builder.append(greekLetters[j]);
-			builder.append(i);
+			//builder.append(i);
 			builder.append(".");
 		}
-		builder.append(greekLetters[greekLetters.length-1] + i);
+		builder.append(greekLetters[greekLetters.length-1]+ String.valueOf(i));
 		return builder.toString();
 	}
 
