@@ -1,4 +1,4 @@
-package com.es.api;
+package com.es.util;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -18,6 +18,11 @@ import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.junit.Test;
 
+import com.es.api.ClientIFace;
+import com.es.api.ClientImpl;
+import com.es.api.InsertRequest;
+import com.es.api.SearchRequest;
+import com.es.api.InsertRequest.Builder;
 import com.es.client.ClientManager;
 import com.es.processor.ExecutionPolicy;
 
@@ -25,7 +30,7 @@ public class InefficientMappingBenchmarkTest {
 	private static final Logger log = Logger.getLogger(InefficientMappingBenchmarkTest.class);
 	private static final String TENANT = "acAsdfqwer";
 	private static final String index = "test-index-55"; //matched the tenantId above.
-	private static final int ITER = 500;
+	private static final int ITER = 40;
 
 	@Test
 	public void manyFieldsMapping() throws IOException, InterruptedException, ExecutionException {

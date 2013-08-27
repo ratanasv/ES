@@ -1,4 +1,4 @@
-package com.es.api;
+package com.es.util;
 
 import java.util.concurrent.TimeUnit;
 
@@ -15,15 +15,18 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.es.api.ClientIFace;
+import com.es.api.ClientImpl;
+import com.es.api.InsertRequest;
+import com.es.api.InsertRequest.Builder;
 import com.es.client.ClientManager;
 import com.es.processor.ExecutionPolicy;
-import com.es.util.ClearIndexWorker;
 
 
 public class RoutingBenchmarkTest {
 
 	private static final Logger log = Logger.getLogger(RoutingBenchmarkTest.class);
-	static int numDocs = 100;
+	static int numDocs = 40;
 	static ClientIFace handler = null;
 	private static final String TENANT = "acAsdfqwer";
 	private static final String index = "test-index-55"; //matched the tenantId above.

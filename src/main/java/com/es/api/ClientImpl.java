@@ -14,6 +14,7 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
+import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 
@@ -53,7 +54,7 @@ public class ClientImpl implements ClientIFace {
 						//.setVersionType(VersionType.EXTERNAL)
 						.execute()
 						.actionGet();
-				log.debug("index=" + indexRes.getIndex() + " id=" + indexRes.getId() + " version=" + indexRes.getVersion());
+				log.trace("index=" + indexRes.getIndex() + " id=" + indexRes.getId() + " version=" + indexRes.getVersion());
 				return true;
 			}
 
@@ -81,7 +82,7 @@ public class ClientImpl implements ClientIFace {
 				SearchRequestBuilder request = createSearchRequest(tenantId, query);
 				SearchResponse searchRes = request.execute().actionGet();
 				for (SearchHit hit : searchRes.getHits().getHits()) {
-					log.debug("id=" + hit.getId() + ", shard=" + hit.getShard() + ", version=" + hit.version());
+					log.trace("id=" + hit.getId() + ", shard=" + hit.getShard() + ", version=" + hit.version());
 					Map<String, Object> result = hit.getSource();
 					matched.add((String) result.get(LOCATOR.toString()));
 				}
@@ -93,11 +94,20 @@ public class ClientImpl implements ClientIFace {
 						.setSize(500)
 						.setRouting(getRouting(tenantId))
 						.setVersion(true)
-						.setQuery(QueryBuilders.fieldQuery(TENANT_ID.toString(), tenantId).analyzeWildcard(true));
-				request = request.setQuery(QueryBuilders.fieldQuery(LOCATOR.toString(), query.getLocatorQuery())
-						.analyzeWildcard(true));
+						.setQuery(
+								QueryBuilders.fieldQuery(TENANT_ID.toString(), tenantId)
+								.analyzeWildcard(true)
+								.allowLeadingWildcard(true));
+				request = request.setQuery(
+						//QueryBuilders.queryString(LOCATOR.toString() + ":" + query.getLocatorQuery())
+						//.analyzeWildcard(true).allowLeadingWildcard(true));
+						QueryBuilders.fieldQuery(LOCATOR.toString(), query.getLocatorQuery())
+						.analyzeWildcard(true).allowLeadingWildcard(true));
 				for (Map.Entry<String, Object> entry : query.getAnnotationQuery().entrySet()) {
-					request = request.setQuery(QueryBuilders.fieldQuery(entry.getKey(), entry.getValue()).analyzeWildcard(true));
+					request = request.setQuery(
+							QueryBuilders.fieldQuery(entry.getKey(), entry.getValue())
+							.analyzeWildcard(true)
+							.allowLeadingWildcard(true));
 				}
 				return request;
 			}
