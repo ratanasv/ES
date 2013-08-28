@@ -1,6 +1,8 @@
 package com.es.api;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +31,7 @@ public class IndexingTest {
 	private static final int NUM_DOCS = 100;
 	private static final ClientIFace HANDLER = new ClientImpl();
 	private static final String TENANT = "ratanasv";
-	private static final String INDEX = "test-index-50";
+	private static final String INDEX = "test-index-50"; //corresponds to the tenant above.
 	private static final String[] greekLetters = {"alpha", "beta", "delta", "gamma", "omega", };
 	
 	@BeforeClass
@@ -54,18 +56,23 @@ public class IndexingTest {
 		Future<List<String>> result = HANDLER.getAllLocators(TENANT, query);
 		log.debug(result.get().toString());
 		Assert.assertEquals("trailing wildcard", NUM_DOCS, result.get().size());
+		List<String> originalContent = new ArrayList<String>();
+		for (int i=0; i<NUM_DOCS; i++) {
+			originalContent.add(bogusLocator(i));
+		}
+		Assert.assertTrue("check if same I", result.get().containsAll(originalContent));
 
 		query = new SearchRequest.Builder().locatorQuery("alpha*omega0").build();
 		result = HANDLER.getAllLocators(TENANT, query);
 		log.debug(result.get().toString());
 		Assert.assertEquals("wildcard in the middle", 1, result.get().size());
-		
+		Assert.assertEquals("check if same II", "alpha.beta.delta.gamma.omega0", result.get().get(0));
 		
 		query = new SearchRequest.Builder().locatorQuery("*omega0").build();
 		result = HANDLER.getAllLocators(TENANT, query);
 		log.debug(result.get().toString());
 		Assert.assertEquals("wildcard in the front", 1, result.get().size());
-		
+		Assert.assertEquals("check if same III", "alpha.beta.delta.gamma.omega0", result.get().get(0));
 		
 	}
 	
